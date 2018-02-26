@@ -19,8 +19,3 @@ In a terminal or command window, navigate to the top-level project directory `sm
 ```python -m smartcab.agent```
 
 This will run the `agent.py` file and execute your agent code.
-
-### Results 
-![Result table](https://github.com/sananand007/StrangerThings/tree/master/smartcab/logs/Results-table.PNG)
-
-![Plots](https://github.com/sananand007/StrangerThings/tree/master/smartcab/logs/Graphs.PNG)
