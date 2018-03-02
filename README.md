@@ -1,9 +1,30 @@
 # StrangerThings
-Some Strange Projects
++ Some Strange Projects involving Machine Learning Concepts and Papers
++ Structured Approach to put all my work in one Repo
 
 ## GANs
  + Generative Adversarial Networks
   - Introduction to GANs
+
+  - **Mini-Project** - IMDB Keras - IMDB project using keras
+  - Keras - Testing Keras module
+  - **Project-1** - First Neural Network Design Project
+  - **Project-2** - Dog Breed Classifier Project
+  - **Mini-Project** - Sentiment Analysis Project by Trask
+  - **Mini-Project** - Student Admissions - Keras Project
+  + Study of Recurrent neural Networks
+     - Recurrent Neural Networks
+     - Long Short term Memory
+     - Back Propagation through Time (BPTT)
+       + Folded Networks to understand better
+  + Practicing Tensor Flow
+   - Training a RNN Network
+  + **Mini-Project** - Sentiment Analysis using RNN/LSTMs
+  + **Mini-Project** - Implementing a SkipGram Model using Tensor Flow
+  + **Mini-Project** - Training a RNN/LSTM to predict the next word
+  + **Project-3** - Generate TV Scripts
+    - Use LSTM/RNNs to train a Model and Generate a TV script using Simpson's Dataset
+    - Next step will be to improve the Training Loss and use the whole Dataset
 
 ## SmartCab
  + How to train a Naive smartcab training agent
