@@ -34,7 +34,10 @@ Kaggle Competitions and Kernel Runs
   + Gluon/mxnet - http://gluon.mxnet.io/
   + Pytorch - http://pytorch.org/tutorials/
   + Torch - http://torch.ch/
-  +
+  + BCE - https://www.kaggle.com/c/ultrasound-nerve-segmentation/discussion/22361
+  + AWS: wget https://s3-us-west-2.amazonaws.com/downloaditems-oregon/churn.txt
+    >(target * K.log(output) + (1.0 - target) * K.log(1.0 - output))
+
   + Boto3: Amazon SDK for Python : https://aws.amazon.com/sdk-for-python/
   + Amazon ML : https://aws.amazon.com/documentation/machine-learning/
   + Comparisions : http://codeinpython.com/tutorials/deep-learning-tensorflow-keras-pytorch/
@@ -42,6 +45,8 @@ Kaggle Competitions and Kernel Runs
   + Fast.ai forum - http://forums.fast.ai/t/implementing-mask-r-cnn/2234
   + Deep Residual networks - https://github.com/KaimingHe/deep-residual-networks
   + Pytorch using DL - http://torch.ch/blog/2016/02/04/resnets.html
+  + Scikit-Image(morphology) - http://scikit-image.org/docs/dev/api/skimage.morphology.html#skimage.morphology.label
+  +
 
 ##  Tensorflow examples
   + https://www.programcreek.com/python/example/90553/tensorflow.one_hot
@@ -56,3 +61,9 @@ Kaggle Competitions and Kernel Runs
 ## Other options for ML and running jupyter notebooks
   + https://www.paperspace.com/
   + https://www.floydhub.com/
+
+## floydhub commands
+ ```
+ floyd init my_jupyter_project
+ floyd run --data sananand007/datasets/datasciencebowl2018/2 --gpu --mode jupyter
+ ```  
