@@ -2,6 +2,17 @@
 + Some Strange Projects involving Machine Learning Concepts and Papers
 + Structured Approach to put all my work in one Repo
 
+# resources
++ https://www.amazon.com/Everybody-Lies-Internet-About-Really/dp/0062390856/ref=sr_1_1?ie=UTF8&qid=1522440665&sr=8-1&keywords=everybody+lies+big+dataaiindex.org
++ The Master Algorithm - Pedro Domingos
+  - LEAPN []
++ Here is a link to that book: https://www.amazon.com/Surfaces-Essences-Analogy-Fuel-Thinking/dp/0465018475
+  Link: https://playground.tensorflow.org
++ Another book referenced in the video - https://www.amazon.com/Master-Algorithm-Ultimate-Learning-Machine-ebook/dp/B012271YB2/
++ Blockchain , NLP , Driverless AI
+
+
+
 ## GANs
  + Generative Adversarial Networks
   - Introduction to GANs
