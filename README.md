@@ -10,6 +10,8 @@
   Link: https://playground.tensorflow.org
 + Another book referenced in the video - https://www.amazon.com/Master-Algorithm-Ultimate-Learning-Machine-ebook/dp/B012271YB2/
 + Blockchain , NLP , Driverless AI
++ CNN - http://cs231n.stanford.edu/syllabus.html
++ Latex - https://www.sharelatex.com/learn/Inserting_Images
 
 
 
@@ -51,6 +53,10 @@
 |5|	epsilon=e^{-(0.005t)}|	0.5  |	0.01    |	A+|	B|	20|
 
 **I choose the 2nd one from the top table**  
+
+## RL
++ Re-enforcement Learning
++ Book - Reinforcement Learning: An Introduction
 
 ## Udacity Capstone
 
