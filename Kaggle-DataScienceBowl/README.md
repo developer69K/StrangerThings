@@ -13,6 +13,7 @@
 ## Conda Environments
   + Common Conda Python 3.x Environments are already provided by Sagemaker
   + This is the pip list I use with environment : tensorflow_p36
+  ```
         naconda-client (1.6.9)
         anaconda-project (0.8.2)
         asn1crypto (0.24.0)
@@ -209,6 +210,7 @@
         XlsxWriter (1.0.2)
         xlwt (1.3.0)
         zict (0.1.3)
+```        
 
 ## Dataset information
   + we just have to go the link and click the download : https://www.kaggle.com/c/data-science-bowl-2018/data
