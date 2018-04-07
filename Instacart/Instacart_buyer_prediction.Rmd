@@ -1,0 +1,640 @@
+---
+title: "Instacart Buyer Analysis"
+author: "Sandeep Anand"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+  #Description 
+  
+  In this competition, Instacart is challenging the Kaggle community to use this anonymized data on customer orders over time to predict which previously purchased products will be in a user's next order. 
+  
+  - The Sample submission file has the user's next order and the products present in the next order 
+  - If there are "n" users them the number of rows in the submission file will be "n"
+  - Not looking for the best model but a strong F statistic or an accurate model
+
+## Getting the Data
+```{r Getting the Data, eval=TRUE, warning=FALSE, echo=FALSE, eval=FALSE}
+path1 <- "C:/Public/Instacart/"
+for (i in list.files(path=path1, pattern = "\\.zip$")){
+  unzip(i, overwrite = TRUE)
+  }
+
+```
+
+```{r Data2, eval=TRUE, warning=FALSE, echo=FALSE}
+path1 <- "C:/Public/Instacart/"
+names <- character(0)
+for (j in list.files(path = path1, pattern = "\\.csv$")) 
+  {
+    names<-c(names,unlist(strsplit(j,"\\."))[1])
+}
+
+```
+
+```{r Data3, eval=TRUE, warning=FALSE, echo=FALSE}
+library(data.table)
+filenames<-list.files(path = path1, pattern = "*.csv$", full.names = TRUE)
+ldf <- lapply(filenames, fread)
+```
+
+```{r assignment, eval=TRUE, warning=FALSE, echo=FALSE}
+for(i in 1:(length(names)-1)){
+  nam <- paste(names[i], "dt", sep = ".")
+  assign(nam, ldf[[i]])
+}
+```
+
+## Assignments to be used for Data-frame names:
+  - "aisles.dt"
+  - "departments.dt"
+  - "order_products__prior.dt"
+  - "order_products__train.dt"
+  - "orders.dt" 
+
+```{r Orders.df Proc, eval=TRUE, warning=FALSE, echo=FALSE}
+order_train.dt<-orders.dt[orders.dt$eval_set=="train",]
+order_prior.dt<-orders.dt[orders.dt$eval_set=="prior",]
+order_test.dt<-orders.dt[orders.dt$eval_set=="test",]
+
+head(order_products__prior.dt)
+
+head(order_prior.dt)
+```
+
+## Getting the mapping done For Prior set
+  - Get the mapping between order_id and the associated products for it for a particular user
+  - New DataTables for getting 
+    + user-id, Order-id and count of products for each of the order-ids
+    + splitting the data-table that corresponds to orders.csv (filtered based on prior) into multiple sub data tables, based on user_id
+    + Get the products for each Order for each of the above data tables and put them into a list that will be an extra row
+    + Helper functions are present to break the number of userIds(~206k) into 207 chunks of 1000 each to process them faster
+    + chks is a List of length 1 which has another list of length 207
+    + Never create multiple variables: not be a wise decision to create multiple vars , why not process and get the output in this function itself
+
+```{r Helper Functions, eval=TRUE, warning=FALSE, echo=FALSE}
+require(plyr)
+chunks <- function(d, n){      
+    chunks <- split(d, ceiling(seq_along(d)/n))
+    names(chunks) <- NULL
+    return(chunks)
+}
+
+chunksplyr <- function(d, n) {
+  is<-seq(from=1, to=length(d), by=n)
+  if (tail(is,1)!=length(d)) {
+    is<-c(is, length(d))
+  }
+  
+  chunks<-ddply(head(seq_along(is),-1),
+                function (i) {
+                  start <- is[i];
+                  end <- is[i+1]-1;
+                  d[start:end]
+                }
+                )
+  lc <- length(chunks)
+  td<-tail(d,1)
+  chunks[[lc]] <- c(chunks[[lc]], td)
+  return(chunks)
+}
+
+```
+
+## Sample Plot to see the value of the number of Orders by each user
+
+ - Get the Order Count based on users
+ - Check & Plot the 10% user_ids who have the maximum number of Orders
+ - Get a quantile distribution of the orders , for eg, home many users fall under 95% of the total orders
+ - 95% of the Users have less than 50 orders , so presumably if a user has already ordered 50 times , very less likely to re-order - Plotted the QQ distribution plot
+
+
+```{r Plots with Analysis 1, eval=TRUE, warning=FALSE, echo=FALSE, message=FALSE}
+numberobs = length(order_prior.dt$order_id)
+numberuserids = unique(order_prior.dt$user_id)
+order_prior.dt_cols<-names(order_prior.dt)
+
+ordcount<-order_prior.dt[, .N, by=user_id]
+
+
+colnames(ordcount)[colnames(ordcount)=="N"]<-"order_count"
+
+library(ggplot2)
+b<-ggplot(data = ordcount, aes(x=user_id, y=order_count, alpha=0.8))
+#debug 
+#b+geom_bar(stat = "identity")
+
+library(dplyr)
+new_ordcount <- ordcount[order(-order_count), ]
+head(new_ordcount)
+quantile(new_ordcount$order_count, probs = seq(0,1,0.05))
+
+#debug
+#ggplot(new_ordcount, aes(sample=order_count)) + stat_qq()
+
+
+```
+
+ - Get the products info for each order - Use Merge concept from Data.table here to get this done amazingly quick :
+    + Used Inner join concept:  https://rstudio-pubs-static.s3.amazonaws.com/52230_5ae0d25125b544caab32f75f0360e775.html
+    + Get the Products data table also merged with the Resultant table to get a better understanding of the products 
+    + DT[i, j, by] - Take DT, subset rows using i, then calculate j, grouped by by.
+    + The order_prior.dt is handled here for evaluations before the predictions
+    + Plot the top 20 products only as most 1% is also a large value to plot
+
+```{r Merge Order_prior and order_product, eval=TRUE, warning=FALSE, echo=FALSE}
+
+setkey(order_prior.dt, order_id)
+setkey(order_products__prior.dt, order_id)
+res.dt<-order_prior.dt[order_products__prior.dt, nomatch=0]
+# Inner Join of prior orders and the Products information data table
+head(res.dt,20)
+
+
+setkey(res.dt, product_id)
+setkey(products.dt, product_id)
+res_final.dt<- res.dt[products.dt, nomatch=0]
+# Inner Join of the Above result and the Products Id and name data table
+head(res_final.dt,20)
+
+
+res.product.name.count<-res_final.dt[, .(order_id, user_id, product_id, product_name)][order(order_id, -user_id)][, .(.N), by= .(product_name)]
+colnames(res.product.name.count)[colnames(res.product.name.count) == "N"] <-"pnames_count"
+quantile(res.product.name.count[order(-pnames_count)]$pnames_count, probs = seq(0,1,0.01))
+
+# Plot the top 20 products only as most 1% is also a large value to plot
+bar <- ggplot(res.product.name.count[order(-pnames_count)][1:20]) +
+  geom_bar(mapping = aes(x=product_name, y=pnames_count), stat = "identity")+
+  ggtitle(label = "Top 20 Products Ordered by Users")
+
+#debug  
+#bar+coord_flip()
+
+product_count <- res_final.dt[, .(order_id, user_id, product_id, product_name)][, .(.N), by= .(order_id, user_id)]
+colnames(product_count)[colnames(product_count)=="N"]<-"product_count"
+head(product_count, 20)
+
+library(dplyr)
+res_sort<-product_count[order(order_id, -product_count),]
+head(res_sort,20)
+
+
+# res_sort has the total number product count of each user for each order_id
+res_sort$color <- ifelse(res_sort$product_count > 30 ,"red",NA)
+temp<-res_sort[order_id %in% c(1:1000)]
+
+#debug
+#ggplot(temp, aes(x = order_id, y=product_count, colour = color)) + geom_bar(stat="identity", position = "dodge")+
+#  theme_minimal() + scale_colour_identity()
+
+
+```
+
+
+
+
+## Habit analysis of each user based on the products ordered sequence
+
+### The Four R code chunks below are not required for the 2nd submission as they belong to the 1st submission
+
+  - Broken the data set to analyze which user is ordering which product more
+  - Used tapply and data table methods to find out that we are having the memory issues so had to break down the data-table
+
+```{r Habit Analysis , warning=FALSE, eval=TRUE, message=FALSE, echo=FALSE}
+head(res_final.dt,20)
+
+#Select the columns that you want to do habit analysis on
+habit1.dt <- res_final.dt[, .(order_id, user_id, order_number, order_dow, order_hour_of_day, product_id, product_name)]
+head(habit1.dt)
+
+#Get the particular columns ordered based on order_id, user_id , order_number
+habit1.order1 <- habit1.dt[order(user_id, order_id, order_number)]
+head(habit1.order1,20)
+
+# Get the new column with the Frequency of occurence of each Product for each user
+habit1.order2 <- habit1.order1[, .(user_id, product_id)]
+head(habit1.order2)
+
+#### Getting a List of Data Tables which has the count per user , the Product_Ids 
+## This will help me to get which products are highly ordered by each user
+# Break to avoid memory issues
+#----------------------------------------------------------------
+setkey(habit1.order2, user_id)
+
+
+#breakwhole<-habit1.order2[user_id %in% c(1:length(habit1.order2$user_id))][, .(Aggregate.count = .N), by=.(user_id, product_id)][order(user_id,-Aggregate.count)]
+
+breakdt1<-NULL
+breakdt2<-NULL
+breakdt3<-NULL
+breakdt4<-NULL
+
+
+head(habit1.order2,20)
+
+
+breakdt1<-habit1.order2[user_id %in% c(1:50000)][, .(Aggregate.count = .N), by=.(user_id, product_id)][order(user_id,-Aggregate.count)]
+breakdt2<-habit1.order2[user_id %in% c(50001:100000)][, .(Aggregate.count = .N), by=.(user_id, product_id)][order(user_id, -Aggregate.count)]
+breakdt3<-habit1.order2[user_id %in% c(100001:150000)][, .(Aggregate.count = .N), by=.(user_id, product_id)][order(user_id,-Aggregate.count)]
+breakdt4<-habit1.order2[user_id %in% c(150001:length(numberuserids))][, .(Aggregate.count = .N), by=.(user_id, product_id)][order(user_id, -Aggregate.count)]
+
+head(breakdt1, 20)
+
+#TODO : Put this into a function to apply all the three breaks
+#To Apply the function below to all the three data tables above
+
+
+# res_pcount1 <- breakdt1[user_id %in% c(1:100000)][, lapply(.SD, 
+#   function(x) {
+#     # x is a list
+#     #-- Get the index 1 and 3 here, as columns are getting repeated due to SD
+#     counter <<- counter+1
+#     if (counter == 1 || counter ==3) {
+#       # Get the Top 10% for each user
+#       top1 <<- as.integer(0.1*length(x))
+#       #print(top1)
+#       }
+#     head(x,top1)
+#     }
+#       ), by=.(user_id)]
+
+
+
+res_heavy <- lapply(list(breakdt1,breakdt2,breakdt3,breakdt4), function(y) {
+  
+  val1 <<- as.integer(y$user_id[1])
+  val2 <<- as.integer(last(y$user_id))    
+  
+  y[user_id %in% c(val1:val2)][, lapply(.SD, 
+                                       function(x){
+                                         head(x,as.integer(0.1*length(x)))
+                                       }), by=.(user_id)]
+})  
+
+
+# breakdt1[user_id %in% c(val1:val2)][, lapply(.SD, 
+#                                        function(x){
+#                                          head(x,as.integer(0.1*length(x)))
+#                                        }), by=.(user_id)]
+
+
+#listofdt.peruser.prodid<-tapply(habit1.order2$product_id, habit1.order2$user_id, function(x){as.data.table(table(x))})
+#----------------------------------------------------------------
+```
+
+## Plotting each User's Top 5% based based on Product Id Count for the 1st 100k users 
+  - This will be a sample to see what is the highest product count for most/average distribution of users
+  - Only 38 Users have product Ids that have been orderes more than 90 times by them
+  - These users are highly likely to order these same products
+  - The reason for getting te top 5% is to make a decision on the final prediction on the test set
+  - res_heavy is the List containing the top 10% of Product count data only , that includes 93% of the user ids
+    so this reduces the Sample size a bit
+
+```{r Plot-analyze 1, eval=TRUE, warning=FALSE, message=FALSE, echo=FALSE}
+
+  #Plotting the 1st chunk 
+
+library(ggrepel)
+nrow(res_heavy[[1]][Aggregate.count>90])
+
+res_heavy[[1]]$color <- ifelse(res_heavy[[1]]$Aggregate.count > 90, "red", NA)
+b <- ggplot(data = res_heavy[[1]], aes(x=user_id, y=Aggregate.count, colour=color)) +
+  geom_bar(stat="identity", position = "dodge")+
+  theme_minimal()+
+  scale_colour_identity()
+  #geom_label(mapping = aes(label=res_pcount1$user_id), stat = "identity", data = res_pcount1[Aggregate.count>85])
+b
+#b + coord_flip() 
+  #geom_text_repel(data=subset(res_pcount1, Aggregate.count>90),
+   #         aes(user_id,Aggregate.count,label=user_id, hjust="top"), label.size = 0.05)
+
+```
+
+
+## Starting with xgboost model to predict on the test set 
+  - Looks like the model needs Features such as "order_hour_of_day" and "order_dow" as well than just predicting based pn Product count for each user
+  - Submission will have only order_id and product_id
+  
+    + First Step stupid prediction with no model but just based on count of Products per user as the only predictor
+
+```{r Prediction-anlysis-1, message=FALSE, eval=TRUE, warning=FALSE, echo=FALSE}
+
+# Initialize the counter and the listval that will account for the product IDs for the final submission
+counterout <<- 0
+finalset <<- list()
+matchflag <<- FALSE
+precistionconstant = 20 # change this as per requirement
+
+  # Try 1- 10
+  # Try 2- 20
+
+res.1<-lapply(order_test.dt$user_id[1:length(order_test.dt$user_id)], function(x) {
+  counterout <<- counterout+1
+  lapply(list(1,2,3,4), function(y) {
+      if (!is.na(match(x, res_heavy[[y]]$user_id)) & !isTRUE(matchflag)) {
+        matchflag <<- TRUE
+        temp.dt <- res_heavy[[y]][user_id %in% x][,.(product_id, Aggregate.count)]
+        if (as.integer(length(temp.dt$product_id))<=precistionconstant) {
+          finalset[counterout] <<- paste(temp.dt$product_id,collapse = " ")
+          #print(finalset)
+        }
+        else
+        {
+          finalset[counterout] <<- paste(temp.dt$product_id[1:precistionconstant], collapse = " ")
+        }
+      }
+  })
+  if (!isTRUE(matchflag))
+  {
+    # Check if there is no Match for any user_id
+    finalset[counterout]<<-"None"
+  }
+  matchflag <<- FALSE
+  })
+
+
+#rapply(example, function(x) {ifelse(is.null(x), "found", x)}, how = "replace")
+
+#rapply(finalset[1:10], function(x) ifelse(is.null(x), "None", x), how = "replace")
+
+# Based on the user_id of the test set, lets come up with prediction based on the maximum probability
+
+
+```
+
+## Joining the two Lists into one data frame and writing to a csv to get the Submission File
+  - Need to characterise this , take almost 5-6 minutes here
+  
+```{r results Section, echo=TRUE, warning=FALSE, eval=TRUE, message=FALSE}
+
+submission <- do.call(rbind, Map(data.frame, order_id = order_test.dt$order_id, products = finalset))
+
+# Test to get a csv and then we can do submission 
+library(dplyr)
+test.sub <- submission[c(1:20),]
+ps1<-"C:/Public/Instacart/submission.csv"
+write.table(submission, file = ps1, sep=",", col.names = TRUE, row.names = FALSE)
+
+```
+
+
+## Analysis for additional optimizations of the F score and use of xgboost
+
+  - Experimenting only with two features order_dow and reordered for now , will include more later
+  - Based on the DOW and hour of day we can add or delete some of the products
+
+```{r Additional optimization, warning=FALSE, message=TRUE, eval=TRUE, echo=FALSE}
+#res_final.dt[user_id==1, .N]
+#head(order_test.dt,10)
+habitopt1.dt <- NULL
+habitopt2.dt <- NULL
+habitopt1.dt <- res_final.dt[, .(order_id, user_id, order_number, order_dow, order_hour_of_day, product_id, reordered)]
+
+#head(habitopt1.dt,10)
+
+habitopt2.dt <- habitopt1.dt[, .(order_id, user_id, order_dow, reordered, product_id)][order(user_id)][,.(user_id,order_dow,product_id)]
+#habitopt2.dt[1:20]
+
+# Subsetting only 10 first test orders 
+testprelim.dt <- order_test.dt[1:10][,.(order_id, user_id, order_dow,order_hour_of_day)]
+useridlist.test <- unique(order_test.dt$user_id)
+
+# Based on Order_dow , check which Product Ids can be eliminated or kept
+habitopt2.dt = NULL 
+habitopt2.dt <- habitopt1.dt[, .(user_id, order_dow, product_id)][order(user_id, order_dow)][user_id %in% useridlist.test,.N, by = .(user_id,order_dow, product_id)]
+colnames(habitopt2.dt)[colnames(habitopt2.dt)=="N"]<-"product_count"
+# find the frequency of each Product ID for user id 1
+
+# Get the top products for each order_dow and compare the solutions that you have or the test set directly
+habitopt3.dt = NULL
+# retun only the top 5% of each dow for the user
+threshold = 0.3 # considering 30% , you can consider higher as well
+
+# This is only for user id 1 , this will be a data table when we consider all the user Ids
+# Get this list for each user id
+val_of_dow<-lapply(unique(habitopt2.dt$user_id), function (x) {
+  ceiling(threshold*habitopt2.dt[user_id %in% x][order(-product_count)][, lapply(.SD, length), by = .(order_dow), .SDcols = c("product_count")]$product_count)
+})
+
+#habitopt2.dt$user_id[1]
+j<<-0
+data.resnew <- data.table()
+for(i in unique(habitopt2.dt$user_id)){ #Create data table final based on the userids you have
+  countval <<- 0
+  j<<-j+1
+  tempnew <- habitopt2.dt[user_id %in% i][order(-product_count)][, lapply(.SD, FUN = function(x){
+  countval <<- countval + 1
+  head(x, val_of_dow[[j]][countval])
+}), by = .(user_id,order_dow), .SDcols = c("product_id")]
+  
+  data.resnew <- rbindlist(list(data.resnew, tempnew))
+}
+
+
+
+data.rescomb <- data.table()
+for (i in unique(data.resnew$user_id)) {
+  tempnew2<-data.resnew[user_id %in% i][, .(combined_val=paste(c(product_id), collapse = " ")), by=.(user_id, order_dow)]
+  data.rescomb<-rbind_list(data.rescomb, tempnew2)
+}
+
+cols<-c("user_id", "order_dow")
+data.rescomb$combcomp<-do.call(paste, c(data.rescomb[cols], sep="-"))
+
+order_test.dt.res1<-NULL
+order_test.dt.res1<-order_test.dt[,.(user_id, order_dow)]
+order_test.dt.res1$combcomp<-apply(order_test.dt.res1[, cols,with=FALSE], 1, paste, collapse="-")
+
+head(data.rescomb,30)
+data.rescomb<-as.data.table(data.rescomb)
+# Debug: with one user id
+# countval<<-0
+# habitopt2.dt[user_id %in% 1][order(-product_count)][, lapply(.SD, FUN = function(x){
+#   countval <<- countval + 1
+#   head(x, val_of_dow[[1]][countval])
+# }), by = .(user_id,order_dow), .SDcols = c("product_id")]
+# Debug: with the use of assign and paste to create multiple data tables
+  #nam<-paste("dt", i, sep = ".")
+#   assign(nam, 
+#          habitopt2.dt[user_id %in% i][order(-product_count)][, lapply(.SD, FUN = function(x){
+#   countval <<- countval + 1
+#   head(x, val_of_dow[[i]][countval])
+# }), by = .(order_dow), .SDcols = c("product_id")])
+
+# Getting the Products combined into one list
+
+```
+## Getting the Final results here
+
+### Helper sites 
+  - https://stackoverflow.com/questions/41936175/r-function-to-evaluate-the-values-in-data-table-columns-against-another-set-of-v
+
+  - https://stackoverflow.com/questions/18359456/paste-two-data-table-columns
+
+  - https://stackoverflow.com/questions/14568662/paste-multiple-columns-together
+
+  - https://stackoverflow.com/questions/5965698/merge-unequal-dataframes-and-replace-missing-rows-with-0
+
+  - https://stackoverflow.com/questions/30913338/join-two-data-tables-and-use-only-one-column-from-second-dt-in-r
+  
+  - https://aurelienmadouasse.wordpress.com/2012/05/22/r-code-how-to-convert-a-list-to-a-data-frame/
+
+```{r Final results with optimization and addition of dow predictor, echo=FALSE, message=TRUE, warning=FALSE}
+# if the match is not there , then get none or else just get the combined_val
+prodidcombcol<<-NULL
+
+# Test done
+dt1<-data.rescomb[, .(combcomp,combined_val)][1:30]
+dt2<-order_test.dt.res1[1:10]
+dt2
+setkey(setDT(dt2), combcomp)
+dt2[dt1, combined_val := i.combined_val]
+dt2[is.na(dt2)]<-"None"
+dt2
+
+
+
+#Actual work
+# TODO : optimize to fill some of the None's with proper estimates
+dt1<-NULL
+dt2<-NULL
+setkey(setDT(order_test.dt.res1), combcomp)
+dt1<-data.rescomb[, .(combcomp, combined_val)]
+order_test.dt.res1[dt1, combined_val := i.combined_val]
+#order_test.dt.res1[is.na(order_test.dt.res1)]<-"None" 
+head(order_test.dt.res1)
+
+
+dt3<-order_test.dt.res1[, .(user_id, combined_val)]
+dt4<-order_test.dt[, .(order_id, user_id)]
+setkey(dt3,user_id)
+setkey(dt4,user_id)
+res.subm<-dt4[dt3,nomatch=0]
+res.subm2<-res.subm[, .(order_id, products=combined_val)]
+
+ps3<-"C:/Public/Instacart/submission.csv"
+sol1.dt <- fread(ps3)
+
+j<<-0
+valx<-lapply(sol1.dt$order_id, function(x) {
+  j <<- j+1
+  if (is.na(res.subm2$products[j])) {
+    #print("entering")
+    res.subm2$products[j]<-sol1.dt$products[j]
+  }
+  else {
+    res.subm2$products[j]<-res.subm2$products[j]
+  }
+})
+
+k<<-0
+valy<-lapply(res.subm2$order_id, function(z) {
+  k<<-k+1
+  if (sol1.dt$products[k]=="None") {
+    sol1.dt$products[k]<-res.subm2$products[k]
+  }
+  else {
+    sol1.dt$products[k]<-sol1.dt$products[k]
+  }
+})
+
+
+#dfn1<- do.call(rbind.data.frame,valx)
+dfn1<-data.frame(
+         lNames = "Products",
+         lVal = unlist(valy))
+
+dfn1$lNames <- sol1.dt$order_id
+colnames(dfn1) <- c("order_id", "products")
+
+# Test to get a csv and then we can do submission 
+ps4<-"C:/Public/Instacart/submission4.csv"
+fwrite(dfn1, ps4)
+
+```
+
+
+## Plotting the Top 1% Product for each user
+ - Most of the Counts for each user_id lies below 20 and it seems most of the maximum products are between (0-10) counts
+ - Have to find another way to find only the top 1% for each user and for each Product id
+ - The Plot below is more granular and zoomed than the plot above and is hence clearer to see
+```{r Plotting habit analysis, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+library(RColorBrewer)      # for brewer.pal(...)
+ggplot(breakdt1[user_id %in% c(1:1000)], aes(x = user_id , y=Aggregate.count)) +
+  geom_point(na.rm = FALSE, stat = "identity") 
+
+
+```
+
+
+ 
+ - Not using the below part of the notebook as that is not the right way to approach the handling of the data set
+
+```{r mapping, eval=TRUE, warning=FALSE, echo=FALSE, eval=FALSE}
+cat("The total number of userIds:", length(numberuserids))
+#Break the data frame order_prior.dt into multiple dts based on user_id
+
+system.time(chks <- chunks(numberuserids,100))
+length(chks)
+#system.time(chks2 <- chunksplyr(numberuserids,1000))
+
+dt = data.table("user_id"=integer(), "order_id"=integer(), "product_count"=integer())
+
+#x <- chks[[1]][1:100]
+
+
+
+idval <- integer()
+order <- integer()
+pcount <- integer()
+
+system.time(
+for (i in 1:2) {
+  x <- chks[[i]][1:100]
+  lapply(x, function(x){
+    for (i in seq_along(x)) {
+      tempval <- order_prior.dt[order_prior.dt$user_id == x[i],]$order_id
+      lapply(seq_along(tempval), function(j){
+        idval[j] <<- x[i]
+        order[j] <<- tempval[j]
+        pcount[j] <<- length(which(order_products__prior.dt$order_id == tempval[j]))
+      })
+    }
+    temp <- data.table("user_id"=idval, "order_id"=order, "product_count"=pcount)
+    dt <<- rbind(dt, temp)
+  })
+}
+)
+
+system.time(
+sapply(chks[1:2], function(x)
+  {
+    lapply(x, function(x){
+      for (i in seq_along(x)) {
+        tempval <- order_prior.dt[order_prior.dt$user_id == x[i],]$order_id
+        lapply(seq_along(tempval), function(j){
+          idval[j] <<- x[i]
+          order[j] <<- tempval[j]
+          pcount[j] <<- length(which(order_products__prior.dt$order_id == tempval[j]))
+        })
+      }
+      temp <- data.table("user_id"=idval, "order_id"=order, "product_count"=pcount)
+      dt <<- rbind(dt, temp)
+    })
+})
+)
+
+```
+
+# Divert the Output to a Text file
+
+```{r Capture the Output, echo=FALSE, warning=FALSE, message=FALSE}
+ps<-"C:/Public/Instacart/output.txt"
+sink(ps, append=TRUE, split=FALSE)
+unlink(ps)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).

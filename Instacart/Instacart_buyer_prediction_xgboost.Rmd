@@ -1,0 +1,374 @@
+---
+title: "Instacart Buyer Analysis"
+author: "Sandeep Anand"
+date: "August 10, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Get the data
+
+```{r Data2, eval=TRUE, warning=FALSE, echo=FALSE}
+path1 <- "C:/Public/Instacart/"
+names <- character(0)
+for (j in list.files(path = path1, pattern = "\\.csv$")) 
+  {
+    names<-c(names,unlist(strsplit(j,"\\."))[1])
+}
+names
+```
+
+## Get it into a data.table
+
+```{r Data3, eval=TRUE, warning=FALSE, echo=FALSE}
+library(data.table)
+filenames<-list.files(path = path1, pattern = "*.csv$", full.names = TRUE)
+ldf <- lapply(filenames, fread)
+filenames
+```
+
+## Assignment here
+
+```{r assignment, eval=TRUE, warning=FALSE, echo=FALSE}
+for(i in 1:(length(names)-1)){
+  nam <- paste(names[i], "dt", sep = ".")
+  assign(nam, ldf[[i]])
+}
+```
+
+## Assignments to be used for Data-frame names:
+  - "aisles.dt"
+  - "departments.dt"
+  - "order_products__prior.dt"
+  - "order_products__train.dt"
+  - "orders.dt" 
+
+```{r Orders.df Proc, eval=TRUE, warning=FALSE, echo=FALSE}
+order_train.dt<-orders.dt[orders.dt$eval_set=="train",]
+order_prior.dt<-orders.dt[orders.dt$eval_set=="prior",]
+order_test.dt<-orders.dt[orders.dt$eval_set=="test",]
+
+head(orders.dt)
+
+head(order_products__prior.dt)
+
+head(order_prior.dt)
+```
+
+## Applying xgboost and post processing the data using data frames only
+
+ - The same can be done using data table also , but chose df instead
+ - xgboost used all numerical vectors only so, it is important that all features to be used are numerical
+ - understand the usage of inner_join , semi_join and left_join 
+ - Formation of a new df using orders.dt and prior orderered products
+
+```{r post processing to apply xgboost, message=FALSE, warning=FALSE, echo=FALSE, eval=TRUE}
+library(data.table)
+library(dplyr)
+library(tidyr)
+
+head(order_train.dt)
+head(order_test.dt)
+
+# Reshaping the data
+
+aisles.dt$aisle <- as.factor(aisles.dt$aisle)
+departments.dt$department <- as.factor(departments.dt$department)
+orders.dt$eval_set <- as.factor(orders.dt$eval_set)
+products.dt$product_name <- as.factor(products.dt$product_name)
+
+products.dt <- products.dt %>% inner_join(aisles.dt) %>% inner_join(departments.dt) %>% select(-aisle_id, -department_id)
+
+rm(aisles.dt, departments.dt)
+
+head(products.dt)
+
+# All the Order Ids are unique in Oders.csv so, the below match can be done 
+order_products__train.dt$user_id <- orders.dt$user_id[match(order_products__train.dt$order_id, orders.dt$order_id)]
+
+order_products <- orders.dt %>% inner_join(order_products__prior.dt, by="order_id")
+
+#just cheking what we are getting here
+head(order_products__train.dt,20)
+head(order_products,200)
+#order_prior.dt[which(order_products$order_id==2539329)]
+
+rm(order_products__prior.dt)
+gc()
+```
+
+## Products
+  - creating Products feature set
+
+```{r Products, message=FALSE, warning=FALSE, eval=TRUE, echo=TRUE}
+
+# multiheirarchical orders
+prd <- order_products %>% arrange(user_id, order_number, product_id) %>% group_by(user_id, product_id) %>% 
+        mutate(product_time = row_number()) %>% ungroup() %>%
+        group_by(product_id) %>%
+        summarise(
+          prod_orders = n(),
+          prod_reorders = sum(reordered),
+          prod_first_orders = sum(product_time == 1),
+          prod_second_orders = sum(product_time == 2)
+        )
+# Everything is Prior here as we got this using inner join with order_products__prior.dt
+head(prd)
+
+
+prd$prod_reorder_probability <- prd$prod_second_orders/prd$prod_first_orders
+prd$prod_reorder_times <- 1+ prd$prod_reorders / prd$prod_first_orders
+prd$prod_reorder_ratio  <- prd$prod_reorders / prd$prod_orders
+
+prd <- prd %>% select(-prod_reorders, -prod_first_orders, -prod_second_orders)
+
+# We Probably have everything here with Products, so will not require this dt anymore
+rm(products.dt)
+gc()
+```
+
+## users 
+  - Getting the user feture set here
+```{r Users, message=FALSE, warning=FALSE, echo=TRUE, eval=TRUE}
+
+# Everything we are dealing with is prior only , all the data collected so for user id also we will need the same 
+head(orders.dt,10)
+users <- orders.dt %>% 
+          filter(eval_set == "prior") %>%
+          group_by(user_id) %>%
+          summarise(
+            user_orders = max(order_number),
+            user_period = sum(days_since_prior_order),
+            user_mean_days_since_prior = mean(days_since_prior_order, na.rm=T)
+          )
+      
+
+
+us <- order_products %>% 
+      group_by(user_id) %>%
+      summarise(
+        user_total_products = n(),
+        user_reorder_ratio = sum(reordered == 1)/sum(order_number>1),
+        user_distinct_products = n_distinct(product_id)
+      )
+
+head(users,10)
+head(us, 10)
+
+users <- users %>% inner_join(us)
+users$user_average_basket <- users$user_total_products/users$user_orders
+
+
+us <- orders.dt %>% 
+    filter(eval_set != "prior") %>%
+    select(user_id, order_id, eval_set, time_since_last_order = days_since_prior_order)
+
+users <- users %>% inner_join(us)
+
+head(users,10)
+
+rm(us)
+gc()
+```
+
+
+## database 
+  - Creating the entire dataset with feature sets that can be directly used with xgboost
+
+```{r DB, message=FALSE, warning=FALSE, echo=TRUE, eval=TRUE}
+
+data<-NULL
+data <- order_products %>% 
+        group_by(user_id, product_id) %>%
+        summarise(
+          up_orders = n(),
+          up_first_order = min(order_number),
+          up_last_order = max(order_number),
+          up_average_cart_position = mean(add_to_cart_order)
+        )
+
+head(data,50)
+
+rm(order_products, orders)
+
+
+# Remember - Each order has multiple products here so "user_orders" is the total orders for each user
+
+data <- data %>% 
+       inner_join(prd, by = "product_id") %>%
+       inner_join(users, by = "user_id")
+
+data$up_order_rate <- data$up_orders/data$user_orders
+data$up_orders_since_last_order<-data$user_orders - data$up_last_order # orders the user ordered after this user , product combination
+data$up_order_rate_since_first_order <- data$up_orders / (data$user_orders - data$up_first_order + 1) # up_orders is basically the total number of times the particular product appeas for that user for all the orders for that user
+
+data <- data %>% left_join(order_products__train.dt %>% select(user_id, product_id, reordered), by = c("user_id", "product_id"))
+
+rm(order_products__train.dt, prd, users)
+gc()
+
+```
+
+## Train/Test Datasets
+
+```{r Train/test ,message=FALSE, warning=FALSE, echo=TRUE, eval=TRUE}
+
+head(data,100)
+train <- as.data.frame(data[data$eval_set == "train",])
+
+train$eval_set <- NULL
+train$user_id <- NULL
+train$product_id <- NULL
+train$order_id <- NULL
+train$reordered[is.na(train$reordered)] <- 0
+
+test <- as.data.frame(data[data$eval_set == "test",])
+
+test$eval_set <- NULL
+test$user_id <- NULL
+test$reordered <- NULL
+
+rm(data)
+gc()
+
+```
+
+## Light GBM - or any other xgboost technique
+ - Using 1st set of parameters gives me a F1 score = 0.363
+
+```{r lightgbm ,message=FALSE, warning=FALSE, echo=TRUE, eval=FALSE}
+library(xgboost)
+
+# 1st try = 0.4, 2nd try = 0.1
+subtrain <- train %>% sample_frac(0.10) # Sample size is up for discussion you can choose as you find optimal
+
+
+# This is the model
+xgb.train <- xgboost(data = as.matrix(subtrain %>% select(-reordered)), 
+                    label = subtrain$reordered, 
+                    max_depth = 2, 
+                    eta = 0.1, 
+                    nthread = 2, 
+                    nrounds = 100,
+                    max_depth = 20,
+                    subsample = 0.5,
+                    colsample_bytree = 0.5,
+                    eval_metric = "logloss",
+                    objective = "binary:logistic")
+# Get Feature importance
+xgb.feature.imp <- xgb.importance(model = xgb.train, colnames(subtrain))
+
+# Get test predictions
+testdata <- as.matrix(test %>% select(-order_id, -product_id))
+
+test$reordered <- predict(xgb.train, testdata)
+
+test$reordered <- (test$reordered > 0.21) * 1
+
+head(test,100)
+
+submission <- test %>% 
+              filter(reordered == 1) %>% 
+              group_by(order_id) %>%
+              summarise(
+                products = paste(product_id, collapse = " ")
+              )
+
+missing <- data.frame(
+          order_id = unique(test$order_id[!test$order_id %in% submission$order_id]),
+          products = "None"
+)
+
+submission <- submission %>% bind_rows(missing) %>% arrange(order_id)
+
+write.csv(submission, file = "submission5.csv", row.names = F)
+```
+
+## more attempts
+  - Attempts to modify the current parameters to make a better submission
+
+```{r xgboost-2, warning=FALSE, message=FALSE, echo=TRUE, eval=TRUE}
+
+# Model -------------------------------------------------------------------
+library(xgboost)
+
+#params <- list(
+#  "objective"           = "reg:logistic",
+#  "eval_metric"         = "logloss",
+#  "eta"                 = 0.1,
+#  "max_depth"           = 6,
+#  "min_child_weight"    = 10,
+#  "gamma"               = 0.70,
+#  "subsample"           = 0.76,
+#  "colsample_bytree"    = 0.95,
+#  "alpha"               = 2e-05,
+#  "lambda"              = 10
+#)
+
+params <- list (
+  "objective"           = "binary:logistic",
+  "eval_metric"         = "logloss",
+  "eta"                 = 0.1,
+  "max_depth"           = 6,
+  "min_child_weight"    = 25,
+  "gamma"               = 0.70,
+  "subsample"           = 0.76,
+  "colsample_bytree"    = 0.95,
+  "alpha"               = 2e-05,
+  "lambda"              = 25  
+
+)
+
+# 1st try = 0.1, 2nd try = 0.33 , 4th try = 0.40
+subtrain <- train %>% sample_frac(0.40) # Sample size is up for discussion you can choose as you find optimal
+
+X<-xgb.DMatrix(as.matrix(subtrain %>% select(-reordered)), label=subtrain$reordered)
+model<-xgboost(data = X, params = params, nrounds = 100)
+
+importance <- xgb.importance(colnames(X), model = model)
+xgb.ggplot.importance(importance)
+
+rm(X, importance, subtrain)
+gc()
+
+#Apply Model
+X<-xgb.DMatrix(as.matrix(test %>% select(-order_id, -product_id)))
+test$reordered <- predict(model, X)
+
+test$reordered <- (test$reordered > 0.21)*1
+
+submission<-NULL
+
+submission <- test %>% 
+              filter(reordered == 1) %>%
+              group_by(order_id) %>%
+              summarize(
+                products = paste(product_id, collapse = " ")
+              )
+
+# getting the product Ids 
+
+ps1<-"C:/Public/Instacart/submission4.csv"
+solold.dt <- fread(ps1)
+
+missing<-NULL
+
+missing <- data.frame(
+  order_id = unique(test$order_id[!test$order_id %in% submission$order_id]),
+  products = "None"
+)
+
+# The below older solution is not useful
+#temp<-missing %>% inner_join(solold.dt, by = "order_id")
+#missing$products <- temp$products
+
+submission <- submission %>% bind_rows(missing) %>% arrange(order_id)
+
+write.csv(submission, file = "submission7.csv", row.names = F)
+```
+
+
