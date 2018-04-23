@@ -13,13 +13,40 @@
 + CNN - http://cs231n.stanford.edu/syllabus.html
 + Latex - https://www.sharelatex.com/learn/Inserting_Images
 + Analytics Vidya: https://www.analyticsvidhya.com/
++ TYRO Labs - https://tryolabs.com/blog/
+
+# Topics that are important to be clear about
++ tf-idf vectorizer
++ Dimensionality reduction to images
+  + **PCA** - Principal Component Analysis
+    + http://www.cse.psu.edu/~rtc12/CSE486/lecture32.pdf
+    + https://medium.com/100-days-of-algorithms
+    + https://en.wikipedia.org/wiki/Principal_component_analysis
+  + **SVD** - Singular Value Decomposition
+    + https://en.wikipedia.org/wiki/Singular-value_decomposition
+  + **LDA** - Linear Discriminative analysis
+  + CCA - Canonical Correlation analysis
+  + **ICA** - Independent Component analysis
+  + NMF - non-negative matrix factorization
++ K means clustering  
++ Bayes Theorem
++ n-grams
++ Batch normalization
++ Regression
+  + Linear
+  + Logistic
+  + Multivariate
++ SVM -Support Vector Machines
+  + Where to place the Decision boundary - reduce the MSE
+  + Margin
++ Naive Bayes Classifier  
++ Random Forest
 
 ## People to Follow:
 + https://people.eecs.berkeley.edu/~jordan/
 
 # KaggleRuns
-
-Kaggle Competitions and Kernel Runs
++ Kaggle Competitions and Kernel Runs
 
 ## Project Report
 + https://github.com/udacity/machine-learning/tree/master/projects/capstone

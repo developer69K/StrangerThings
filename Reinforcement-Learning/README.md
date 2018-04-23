@@ -1,10 +1,17 @@
 # Learning with RL
 
 
-## Dynamic Programming
+## Udacity : Dynamic Programming
+
++ Getting to the optimal policy
+  + Agent calculates the value function through iterative policy Evaluation
+  + Design the Policy Improvement process such that the new policy is at least as good as the current one
+  + policy (Iterative policy evaluation) -> Value Function (policy Improvement) -> new Policy [Iterate till be converge]
++ TODO: not just the FrozenLake env. Try the optimal policy iteration for any MDP
 
 + **parts 0/1**
-```(python)
+
+```
 
 #actual solution
 def policy_evaluation(env, policy, gamma=1, theta=1e-8):
@@ -43,6 +50,20 @@ def policy_evaluation(env, policy, gamma=1, theta=1e-8):
 
 ```
 
++ **parts 2**
+
+```
+def q_from_v(env, V, s, gamma=1):
+    q = np.zeros(env.nA)
+
+    ## TODO: complete the function
+    for a in range(env.nA):
+        sum_=0
+        for x in range(len(env.P[s][a])):
+            sum_+= env.P[s][a][x][0]*(env.P[s][a][x][2] + gamma*V[env.P[s][a][x][1]])
+        q[a]=sum_    
+    return q
+```
 
 ## Resources
 + Richard Sutton's book : http://www.wildml.com/2016/10/learning-reinforcement-learning/
