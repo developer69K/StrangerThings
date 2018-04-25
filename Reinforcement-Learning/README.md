@@ -4,6 +4,7 @@
 ## Udacity : Dynamic Programming
 
 + Getting to the optimal policy
+  + One Step dynamics - Moving by one step
   + Agent calculates the value function through iterative policy Evaluation
   + Design the Policy Improvement process such that the new policy is at least as good as the current one
   + policy (Iterative policy evaluation) -> Value Function (policy Improvement) -> new Policy [Iterate till be converge]
@@ -53,15 +54,15 @@ def policy_evaluation(env, policy, gamma=1, theta=1e-8):
 + **parts 2**
 
 ```
+# env.P[1][0] = prob, next_state, reward, done
+
 def q_from_v(env, V, s, gamma=1):
     q = np.zeros(env.nA)
 
     ## TODO: complete the function
     for a in range(env.nA):
-        sum_=0
         for x in range(len(env.P[s][a])):
-            sum_+= env.P[s][a][x][0]*(env.P[s][a][x][2] + gamma*V[env.P[s][a][x][1]])
-        q[a]=sum_    
+            q[a]+= env.P[s][a][x][0]*(env.P[s][a][x][2] + gamma*V[env.P[s][a][x][1]])
     return q
 ```
 

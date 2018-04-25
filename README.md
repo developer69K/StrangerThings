@@ -48,6 +48,13 @@
 # KaggleRuns
 + Kaggle Competitions and Kernel Runs
 
++ Word2vec
++ https://gist.github.com/primaryobjects/8038d345aae48ae48988906b0525d175
++ http://www.rpubs.com/mukul13/rword2vec
++ http://textminingonline.com/dive-into-nltk-part-x-play-with-word2vec-models-based-on-nltk-corpus
++ https://cran.r-project.org/web/packages/text2vec/vignettes/text-vectorization.html
++ https://www.tensorflow.org/tutorials/word2vec
+
 ## Project Report
 + https://github.com/udacity/machine-learning/tree/master/projects/capstone
 
