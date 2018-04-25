@@ -2,25 +2,36 @@
 
 ### Question1
 ```
-In the A/B Testing ,
+In the A/B Testing,
     P(Liking Page A) = 0.20
     P(Liking Page B) = 0.2143
 
-This statistic points that B is the better choice with the given data available, but I am not yet confident that B is a better choice than A
+This statistic points that B is the better choice with the given data available,
+but I am not yet confident that B is a better choice than A
 with a difference between their % of liking so small,
-I would rather consider a bigger confidence interval between them , may be 20\% higher ie, B being higher than A by 20% or A being higher than B by 20%.
+I would rather consider a bigger confidence interval between them,
+may be 20\% higher ie, B being higher than A by 20% or A being higher than B by 20%.
 ```
 
 ## Question2
 ```
-Since there is no restriction as to how to categorize the users,  I would like to use the following categories for this case, Sports, Entertainment, Food, Health and Technology.
+Since there is no restriction as to how to categorize the users,  
+I would like to use the following categories for this case, Sports, Entertainment, Food, Health and Technology.
 
-A list that would represent the above will be a 5 element list. We use a word list of the topics and increment the count for each topic if the word appears for that tweet
-For example, if the tweet would be something like,  "I love Bryan Adams!!" , This contains the word "Bryan" and "Adams", which will be part of the word list for the topic "Entertainment",
+A list that would represent the above will be a 5 element list.
+We use a word list of the topics and increment the count for each topic if the word appears for that tweet
+For example, if the tweet would be something like,  
+"I love Bryan Adams!!" , This contains the word "Bryan" and "Adams",
+which will be part of the word list for the topic "Entertainment",
 Hence this will output a distribution [0,0,1,0,0]
 
-Now the Question is to categorize the words I would need to find the relation of the words with that of the category, that is where the word2vec model will be helpful
-My idea would be to do a word2vec on my text and check the cosine distance, of some of the important/main words with the category word occurring per tweet per userid and hence I will be able to categorize the userid's based on the tweet. I can fill up the distribution matrix based on these similarities and then each userid will be assigned a category to be printed out
+Now the Question is to categorize the words I would need to find the relation
+of the words with that of the category, that is where the word2vec model will be helpful
+My idea would be to do a word2vec on my text and check the cosine distance,
+of some of the important/main words with the category word occurring per tweet per userid
+and hence I will be able to categorize the userid's based on the tweet. I can fill up
+the distribution matrix based on these similarities and then each userid will be assigned a
+category to be printed out
 
 I will train my model with the corpus to generate
 ```
@@ -31,7 +42,8 @@ I will train my model with the corpus to generate
 + For Each tweet I will remove the punctuations and the stopwords/common words so that the important or uncommon words can be picked up for training
 + After training we can calculate the cosine distance of the priority words for each tweet with respect to the categories and thus can categorize them
   + Each tweet can have more than one priority word, In that case I will use the category lowest cosine distance
-  + Some examples as such:
+  + I have described an example below
+
   ```
   "user_id":11,
   "tweet":"I love Basketball games in LosAngeles!"
