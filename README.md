@@ -59,6 +59,7 @@
 
 ## Bias Variance
 + http://scott.fortmann-roe.com/docs/BiasVariance.html
++ https://www.quora.com/What-is-regularization-in-machine-learning
 
 ## Project Report
 + https://github.com/udacity/machine-learning/tree/master/projects/capstone

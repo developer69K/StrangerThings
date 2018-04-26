@@ -1,6 +1,6 @@
 ## Project [ML Interview Practice]
 
-## Question1
+## Question 1
 ```
 In the A/B Testing,
     P(Liking Page A) = 0.20
@@ -13,7 +13,7 @@ I would rather consider a bigger confidence interval between them,
 may be 20\% higher ie, B being higher than A by 20% or A being higher than B by 20%.
 ```
 
-## Question2
+## Question 2
 ```
 Since there is no restriction as to how to categorize the users,  
 I would like to use the following categories for this case, Sports, Entertainment, Food, Health and Technology.
@@ -97,7 +97,7 @@ counts_<-tidyform %>% count(word, sort=TRUE)
 14          i     1
 15         it     1
 ```
-## Question3
+## Question 3
 
 + In a classification problem, with labelled cases, if we are trying to fit a model not to over-fit
 + Rule of thumb is a good model should have a low training error and a low generalization error, there should always be a bias-variance tradeoff, low Bias and high Variance caused over-fitting
@@ -107,7 +107,7 @@ counts_<-tidyform %>% count(word, sort=TRUE)
 + One of the steps that we can take is L2 regularization where we add more information(regularization term) so that the complexity of the model is reduced
 + Data augmentation techniques and Normalization also helps reduce overfitting in image classification problems
 
-## Question4
+## Question 4
 
 **Problem** I am tasked with is making a learning Agent, that learns for user's behavior while using a 3D modelling software based on click pattern and recommends changes
 + This is a simpler reinforcement Learning problem as I see it
@@ -142,3 +142,20 @@ This might be a prompt after start or a right click
   + Flip
   + Add Reference Planes
 + As the Software matures, I will thus have more data and will have stronger policies for my recommendation system, to recommend certain features, as taskbars, right clicks or prompts
+
+## Question 5
+
+Regularization is necessary for cases where we overfit easily to the training set, Anytime we try to fit the Noise along with the pattern we want to predict we will overfit.
++ The general cases where regularization is necessary is a supervised Learning setting, where we try to fit our models to predict such that we match the labels
++ We keep adding more features which results in addition of complexity and fits the training set better
++ Training set error decreases and test set error is higher
+Regularization will not be ideal in cases of unsupervised learning, where there are no labels as such. Also for under-fitting scenarios, it is also not required
+
+## Question 6
+
+This problem is almost exactly similar to one of my Kaggle projects, it is called Instacart Buyer Prediction analysis.
+
+**Problem description**
+```
+
+```
