@@ -48,12 +48,17 @@
 # KaggleRuns
 + Kaggle Competitions and Kernel Runs
 
-+ Word2vec
+## Word2vec
 + https://gist.github.com/primaryobjects/8038d345aae48ae48988906b0525d175
 + http://www.rpubs.com/mukul13/rword2vec
 + http://textminingonline.com/dive-into-nltk-part-x-play-with-word2vec-models-based-on-nltk-corpus
 + https://cran.r-project.org/web/packages/text2vec/vignettes/text-vectorization.html
 + https://www.tensorflow.org/tutorials/word2vec
++ https://www.tidytextmining.com/tidytext.html
++ http://snap.stanford.edu/class/cs224w-2013/projects2013/cs224w-041-final.pdf
+
+## Bias Variance
++ http://scott.fortmann-roe.com/docs/BiasVariance.html
 
 ## Project Report
 + https://github.com/udacity/machine-learning/tree/master/projects/capstone

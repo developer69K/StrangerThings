@@ -1,6 +1,6 @@
 ## Project [ML Interview Practice]
 
-### Question1
+## Question1
 ```
 In the A/B Testing,
     P(Liking Page A) = 0.20
@@ -97,3 +97,45 @@ counts_<-tidyform %>% count(word, sort=TRUE)
 14          i     1
 15         it     1
 ```
+## Question3
+
++ In a classification problem, with labelled cases, if we are trying to fit a model not to over-fit
++ Rule of thumb is a good model should have a low training error and a low generalization error, there should always be a bias-variance tradeoff, low Bias and high Variance caused over-fitting
++ Some of the initial steps that we can take is not to make the model overly complex, for example for an image classification problem trying a simple 3-4 layers conv2D
+  will be a good place to start with rather considering too many hidden layers and parameters
++ Some of the other process is introducing a validation set, or doing cross validation, precisely a k-fold CV, where you change the training and the validation sets, though a k-fold CV might be high on compute time
++ One of the steps that we can take is L2 regularization where we add more information(regularization term) so that the complexity of the model is reduced
++ Data augmentation techniques and Normalization also helps reduce overfitting in image classification problems
+
+## Question4
+
+**Problem** I am tasked with making a learning system, that learns for user's behavior while using a 3D modelling software based on click pattern and recommends changes
++ This is a reinforcement Learning problem as I see it
++ My learning agent is created in a way such that for each state, I have to find what the next state can be and what will be the reward associated for going to the new state, At each step the agent will perform an action which leads to going to a new state(possibly) and receiving a reward, The goal of the agent is to define an optimal policy that maximizes the reward and hence the policy will be the decision for my agent to take       
++ I will define a State matrix of all the states that the user can be at based on a initial state
++ Initial State will could be to Start a Model, Over the period of time I would need to collect the data for  determining the click pattern, to finalize what are the states that I could define, For eg:
+```
+File -> Project -> Load a Picture -> Rotate the picture (by a degree) -> select a component (in the pic) -> Symmetrize -> Flip (by a degree) -> Save the model
+```
++ **The Buttons used here**
+  + File
+  + Project
+  + Load
+  + Rotate
+  + Select a Component
+  + Symmetrize
+  + Flip
+  + Save
++ Our Training set will constitute of these states/buttons and the count of each state
++ Our Model will be based on the probability of going to the next state given in a certain state
+```
+P(Load|Project) > P(Create|Project), then the system will recommend the next state to be Load (might be a prompt after start or a right click)
+```
++ I will start keeping rewards or penalties for reaching a new state, based on actual user responses to make the system learn.
++ As the system learns, the Policies will be optimized and the agent will start giving better suggestions
++ Based on the counter statistics we can also have a "Taskbar" on the software which will have the high hitters, for example:
+  + Smoother
+  + Rotate
+  + Flip
+  + Add Reference Planes
++ As the Software matures, I will thus have more data and will have stronger policies for my recommendation system, to recommend certain features, as taskbars, right clicks or prompts
