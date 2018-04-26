@@ -109,13 +109,14 @@ counts_<-tidyform %>% count(word, sort=TRUE)
 
 ## Question4
 
-**Problem** I am tasked with making a learning system, that learns for user's behavior while using a 3D modelling software based on click pattern and recommends changes
-+ This is a reinforcement Learning problem as I see it
+**Problem** I am tasked with is making a learning Agent, that learns for user's behavior while using a 3D modelling software based on click pattern and recommends changes
++ This is a simpler reinforcement Learning problem as I see it
 + My learning agent is created in a way such that for each state, I have to find what the next state can be and what will be the reward associated for going to the new state, At each step the agent will perform an action which leads to going to a new state(possibly) and receiving a reward, The goal of the agent is to define an optimal policy that maximizes the reward and hence the policy will be the decision for my agent to take       
 + I will define a State matrix of all the states that the user can be at based on a initial state
-+ Initial State will could be to Start a Model, Over the period of time I would need to collect the data for  determining the click pattern, to finalize what are the states that I could define, For eg:
++ Initial State could be to Start a Model, Over the period of time I would need to collect the data for  determining the click pattern, to finalize what are the states that I could define, For example
 ```
-File -> Project -> Load a Picture -> Rotate the picture (by a degree) -> select a component (in the pic) -> Symmetrize -> Flip (by a degree) -> Save the model
+File -> Project -> Load a Picture -> Rotate the picture (by a degree) ->
+select a component (in the pic) -> Symmetrize -> Flip (by a degree) -> Save the model
 ```
 + **The Buttons used here**
   + File
@@ -126,10 +127,12 @@ File -> Project -> Load a Picture -> Rotate the picture (by a degree) -> select 
   + Symmetrize
   + Flip
   + Save
-+ Our Training set will constitute of these states/buttons and the count of each state
-+ Our Model will be based on the probability of going to the next state given in a certain state
++ Our Training set will constitute of these states/buttons and the count of each states
++ Our Model will be based on the probability of going to the next state given in a certain state, such as
 ```
-P(Load|Project) > P(Create|Project), then the system will recommend the next state to be Load (might be a prompt after start or a right click)
+P(Load|Project) > P(Create|Project),
+then the system will recommend the next state to be Load
+This might be a prompt after start or a right click
 ```
 + I will start keeping rewards or penalties for reaching a new state, based on actual user responses to make the system learn.
 + As the system learns, the Policies will be optimized and the agent will start giving better suggestions
