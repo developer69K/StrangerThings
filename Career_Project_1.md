@@ -166,16 +166,16 @@ System Design steps and algorithm:
     1,       1,         56,        0
     1,       1,         34,        0
     1,       1,         78,        1
-  user_id   order_id    eval   order_number   order_dow   order_hour_of_day   days_since_prior_order
+  user_id   order_id      eval    order_number    order_dow     order_hour_of_day     days_since_prior_order
     1,           3,       train,       5,            3,           13,                    7
     2,           5,       test,        7,            3,           15,                    6  
-  department_id department
-        1,        frozen  
-        2,        other
-  product_id product_name department_id
+  department_id   department
+        1,          frozen  
+        2,          other
+  product_id  product_name  department_id
         56,     Chocolate,    5   
   ```
-+ The above information needs to be preprocessed to make sense of the user's prior buying activity
++ The above information needs to be preprocessed to make sense of the user's prior buying activity and to derive features
 + The output should be, the user_id and with it the products the user is likely to buy next order  
 ```
   user_id order_id products
