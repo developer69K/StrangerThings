@@ -166,12 +166,18 @@ System Design steps and algorithm:
     1,       1,         56,        0
     1,       1,         34,        0
     1,       1,         78,        1
-  user_id   order_id      eval    order_number    order_dow     order_hour_of_day     days_since_prior_order
+    ```
+    ```
+    user_id   order_id      eval    order_number    order_dow     order_hour_of_day     days_since_prior_order
     1,           3,       train,       5,            3,           13,                    7
     2,           5,       test,        7,            3,           15,                    6  
+    ```
+  ```
   department_id   department
         1,          frozen  
         2,          other
+  ```
+  ```
   product_id  product_name  department_id
         56,     Chocolate,    5   
   ```
@@ -182,9 +188,9 @@ System Design steps and algorithm:
 ```
 + This is a supervised learning setting, we have the features and labels and we need to predict
 + I will use a lightgbm() model to train
-  + lightgbm is a python API for fast gradient boosting technique based on decision tree algorithm where we rank decisions efficiently based on the the training set
-  + I also consider this as this has been used for many Kaggle competitions and it is based on the famous xgboost package
-+ Next step is to feature engineer, to create all the features(parameters) necessary to predict a result, The features that I can have are
+  + lightgbm is a python API for fast gradient boosting based on decision tree algorithm where we rank decisions efficiently based on the information we have through features
+  + I also consider this as this has been used for many Kaggle competitions
++ Next step is to feature engineer, to create all the features(parameters) necessary to predict a result, The features that I can think of are
   ```
   user's total orders
   user's total items
@@ -201,8 +207,8 @@ System Design steps and algorithm:
   ```
 + Once I have constructed the features from the given data, I will put the input in a format that can be used as input to train.
 + Using a data frame is the best way to handle the data preprocessing steps, so I will be using the pandas library for that
-+ It is also important that once the features have been engineered the original dataframe is flushed/cleared to free memory, this is something I realized is very important for faster processing, even while using AWS or other ways of compute
-+ parameters for the lightgbm() model will need to be tweaked, some of the common params are shown below :
++ It is also important that once the features have been engineered the original dataframe is flushed/cleared to free memory, this is something I realized is very important for faster processing, even while using AWS or locally
++ parameters for the lightgbm() model will need to be tweaked, some of the common params are shown below, there are so many other parameters which I can go through through the Lightgbm() wiki to finalize
   ```
   'task':'train'
   'boosting_type':'gbdt'  #gradient boosing decision tree
