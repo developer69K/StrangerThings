@@ -153,11 +153,10 @@ Regularization will not be ideal in cases of unsupervised learning, where there 
 
 ## Question 6
 
-This problem is almost exactly similar to one of my Kaggle projects, it is called Instacart Buyer Prediction analysis.
-
 **Problem description**
 ```
-Given the purchase history of customers and catalog of store items, predict what the customer will purchase as the next order and hence give a coupon based on inventory present
+Given the purchase history of customers and catalog of store items, predict what the
+customer will purchase as the next order and hence give a coupon to the user
 ```
 
 System Design steps and algorithm:
