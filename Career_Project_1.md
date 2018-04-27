@@ -219,3 +219,7 @@ System Design steps and algorithm:
   ```
 + After the Training process is complete, I will predict the outcome based on the test set features
 + The Outcome will give me the product Ids for the user's next order for which I can send out the coupon's to the user_id
+
+## Question 7
++ If I am hired as a Machine Learning Engineer, I see myself becoming more adept and experienced with Machine learning algorithms, I see myself in a role where I am learning as well as building new systems and working as a team in the process. I see myself as an asset to the company who helps the company grow in the field on Machine learning.
++ My Long Term career goals is to work on leading Machine learning techniques and also be in touch with academia which play an important role in this field, this position is suitable for that as this gives me the practical hands on platform to keep learning and apply my knowledge 
