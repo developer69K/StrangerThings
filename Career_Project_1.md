@@ -157,5 +157,60 @@ This problem is almost exactly similar to one of my Kaggle projects, it is calle
 
 **Problem description**
 ```
-
+Given the purchase history of customers and catalog of store items, predict what the customer will purchase as the next order and hence give a coupon based on inventory present
 ```
+
+System Design steps and algorithm:
++ We would need to have a certain set of information from the purchase history of customers, let's say I have the below information in the form of .csv's
+  ```
+  user_id order_id product_id reordered
+    1,       1,         56,        0
+    1,       1,         34,        0
+    1,       1,         78,        1
+  user_id   order_id    eval   order_number   order_dow   order_hour_of_day   days_since_prior_order
+    1,           3,       train,       5,            3,           13,                    7
+    2,           5,       test,        7,            3,           15,                    6  
+  department_id department
+        1,        frozen  
+        2,        other
+  product_id product_name department_id
+        56,     Chocolate,    5   
+  ```
++ The above information needs to be preprocessed to make sense of the user's prior buying activity
++ The output should be, the user_id and with it the products the user is likely to buy next order  
+```
+  user_id order_id products
+```
++ This is a supervised learning setting, we have the features and labels and we need to predict
++ I will use a lightgbm() model to train
+  + lightgbm is a python API for fast gradient boosting technique based on decision tree algorithm where we rank decisions efficiently based on the the training set
+  + I also consider this as this has been used for many Kaggle competitions and it is based on the famous xgboost package
++ Next step is to feature engineer, to create all the features(parameters) necessary to predict a result, The features that I can have are
+  ```
+  user's total orders
+  user's total items
+  user's average gap between orders
+  user's average basket (total items/total orders)
+  order hour of day
+  days since prior order
+  department id
+  product reorders
+  product reorder rate
+  user's most frequent orders
+  user's last order
+  user's most frequent order rate
+  ```
++ Once I have constructed the features from the given data, I will put the input in a format that can be used as input to train.
++ Using a data frame is the best way to handle the data preprocessing steps, so I will be using the pandas library for that
++ It is also important that once the features have been engineered the original dataframe is flushed/cleared to free memory, this is something I realized is very important for faster processing, even while using AWS or other ways of compute
++ parameters for the lightgbm() model will need to be tweaked, some of the common params are shown below :
+  ```
+  'task':'train'
+  'boosting_type':'gbdt'  #gradient boosing decision tree
+  'objective':'binary'
+  'metric':{'binary_logloss'}
+  'num_leaves': 90
+  'max_depth': 10
+  ```
++ After the Training process is complete, I will predict the outcome based on the test set features
++ The Outcome will give me the product Ids for the user's next order for which I can send out the coupon's to the user_id

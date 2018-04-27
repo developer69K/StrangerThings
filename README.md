@@ -61,6 +61,11 @@
 + http://scott.fortmann-roe.com/docs/BiasVariance.html
 + https://www.quora.com/What-is-regularization-in-machine-learning
 
+## using lightgbm and xgboost
++ https://github.com/Microsoft/LightGBM
++ https://lightgbm.readthedocs.io/en/latest/index.html
++ https://towardsdatascience.com/catboost-vs-light-gbm-vs-xgboost-5f93620723db
+
 ## Project Report
 + https://github.com/udacity/machine-learning/tree/master/projects/capstone
 
