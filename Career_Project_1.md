@@ -10,7 +10,7 @@ This statistic points that B is the better choice with the given data available,
 but I am not yet confident that B is a better choice than A
 with a difference between their % of liking so small,
 I would rather consider a bigger confidence interval between them,
-may be 20\% higher ie, B being higher than A by 20% or A being higher than B by 20%.
+may be 20% higher ie, B being higher than A by 20% or A being higher than B by 20%.
 ```
 
 ## Question 2
@@ -59,43 +59,50 @@ I will train my model with the corpus to generate
 
   Normalized Sum      [0.35, 0.55, 0.775, 0.7, 0.775] ==> This shows sports as the lowest distance and hence the userid "11" is put under the category "sports"
   ```
-#### Some Preprocessing steps:
-+ Code for counting words without the presence of any Punctuations
-
+#### Some Preprocessing steps are shown below:
++ Code for taking a json file as input and counting words without the presence of any Punctuations
++ Plotted a Histogram at : http://rpubs.com/crafter707/384299
+```
+{
+ "user_id": [1,2,3,4,5,6],
+ "timestamp": ["2016-03-22_11-21-20","2016-03-22_11-31-20","2016-05-22_11-31-20","2018-03-22_11-31-20","2016-03-27_11-31-20","2016-08-22_11-31-20"],
+ "tweet": ["It's #dinner-time!", "It's going to be Fun!!", "I love New York!", "What is wrong with this Game!", "We are going to Atlanta!", "Jack Nicolson!!"]
+}
+```
++ R Code
 ```(R)
 library(dplyr)
 library(janeaustenr)
 library(tidytext)
+library(rjson)
 
+res<-fromJSON(file = "C:/Public/Code/json/tw1.json")
+res1<-as.data.frame(res)
 
-text<-c("The world is flat!","There is no good in doing this","I love Basketball","There is something in the air", "where are you going sir?","Come on , lets do it!")
-text_df<-data_frame(line=1:6, text=text)
+#text<-c("The world is flat!","There is no good in doing this","I love Basketball","There is something in the air", "where are you going sir?","Come on , lets do it!")
+text_df<-data_frame(line=1:6, text=as.character(res1$tweet))
 
 tidyform<-text_df %>% unnest_tokens(word, text)
-
 counts_<-tidyform %>% count(word, sort=TRUE)
 ```
 + Output:
 ```
-> head(counts_,15)
-# A tibble: 15 x 2
-         word     n
-        <chr> <int>
- 1         is     3
- 2         in     2
- 3        the     2
- 4      there     2
- 5        air     1
- 6        are     1
- 7 basketball     1
- 8       come     1
- 9         do     1
-10      doing     1
-11       flat     1
-12      going     1
-13       good     1
-14          i     1
-15         it     1
+> head(counts_,12)
+# A tibble: 12 x 2
+      word     n
+     <chr> <int>
+ 1   going     2
+ 2    it's     2
+ 3      to     2
+ 4     are     1
+ 5 atlanta     1
+ 6      be     1
+ 7  dinner     1
+ 8     fun     1
+ 9    game     1
+10       i     1
+11      is     1
+12    jack     1
 ```
 ## Question 3
 
@@ -222,4 +229,4 @@ System Design steps and algorithm:
 
 ## Question 7
 + If I am hired as a Machine Learning Engineer, I see myself becoming more adept and experienced with Machine learning algorithms, I see myself in a role where I am learning as well as building new systems and working as a team in the process. I see myself as an asset to the company who helps the company grow in the field on Machine learning.
-+ My Long Term career goals is to work on leading Machine learning techniques and also be in touch with academia which play an important role in this field, this position is suitable for that as this gives me the practical hands on platform to keep learning and apply my knowledge 
++ My Long Term career goals is to work on leading Machine learning techniques and also be in touch with academia which play an important role in this field, this position is suitable for that as this gives me the practical hands on platform to keep learning and apply my knowledge
