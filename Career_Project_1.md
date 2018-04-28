@@ -62,6 +62,8 @@ I will train my model with the corpus to generate
 #### Some Preprocessing steps are shown below:
 + Code for taking a json file as input and counting words without the presence of any Punctuations
 + Plotted a Histogram at : http://rpubs.com/crafter707/384299
++ I am still in the process to complete this project, but these are the starting steps
+
 ```
 {
  "user_id": [1,2,3,4,5,6],
@@ -69,7 +71,8 @@ I will train my model with the corpus to generate
  "tweet": ["It's #dinner-time!", "It's going to be Fun!!", "I love New York!", "What is wrong with this Game!", "We are going to Atlanta!", "Jack Nicolson!!"]
 }
 ```
-+ R Code
++ **R Code**
+
 ```(R)
 library(dplyr)
 library(janeaustenr)
@@ -85,7 +88,7 @@ text_df<-data_frame(line=1:6, text=as.character(res1$tweet))
 tidyform<-text_df %>% unnest_tokens(word, text)
 counts_<-tidyform %>% count(word, sort=TRUE)
 ```
-+ Output:
++ **Output**
 ```
 > head(counts_,12)
 # A tibble: 12 x 2
