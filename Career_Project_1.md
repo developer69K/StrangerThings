@@ -1,8 +1,9 @@
 ## Project [ML Interview Practice]
 
 ## Question 1
-```
-In the A/B Testing,
+
+In the A/B Testing, we see the below information given to us
+
     P(Liking Page A) = 0.20
     P(Liking Page B) = 0.2143
 
@@ -11,7 +12,52 @@ but I am not yet confident that B is a better choice than A
 with a difference between their % of liking so small,
 I would rather consider a bigger confidence interval between them,
 may be 20% higher ie, B being higher than A by 20% or A being higher than B by 20%.
+Also test plan durations can affect the conversion rate, by conversion rate I
+mean coming to the page and clicking the button
+
+Let's see if we can do a Hypothesis testing for this, Hypothesis test is one of
+the best way to validate the claim made by a population. But for this case, There
+is the complication of when to stop the test, do we keep running the tests on Page A
+and Page B till a particular Page is significantly better in terms of probability
+than the other
+
+Consider A to be the control set and B to be the test set
+
+**H0 (Null Hypothesis)**
++ p(B)=p(A)
+
+**H1 (Alternate Hypothesis)**
++ p(B)!=p(A)
+
+To Prove for or against the Null hypothesis, we would need to check the p-value
+A p-value is a number, that you get by running the hypothesis test on your data.
+
+if p-value>0.05, then we do not have enough evidence against the Null Hypothesis
+and we would go with the Null Hypothesis
+if p-value<0.05, then we reject the Null hypothesis
+
+We will start the test with a simulated random experiment for a large number of iterations
+under the Null hypothesis, to check the respective p-values and thus determine which page
+is better. There are two sets of people here, control set(page A) and test set(page B).  
+
+Below the theory for the analysis :
+
+One of the decisions is to determine the number of data points needed to get a statistically significant result. This is called **statistical power**. Power has an inverse trade-off with size. The smaller the change you want to detect or the increased confidence you want to have in the result, means you have to run a larger experiment.
+
+As you increase the number of samples, the confidence interval moves closer to the mean
 ```
+  α=P(reject null | null true)
+  β=P(fail to reject null | null false)
+
+1−β is referred to as the sensitivity of the experiment, or statistical power. People often choose high sensitivity, typically around 80%.
+
+For a small sample, α is low and β is high
+
+```
+Comparing two samples
+For comparing two samples, we calculate the pooled standard error. For e.g., suppose Xcont and Ncont are the control number of users that click, and the total number of users in the control group. Let Xexp and Nexp be the values for the experiment. The pooled probability is given by
+
+$$F(\omega) = \frac{1}{\sqrt{2\pi}} \int_{-\infty}^{\infty} f(t) , e^{ - i \omega t}dt$$
 
 ## Question 2
 ```
@@ -231,5 +277,6 @@ System Design steps and algorithm:
 + The Outcome will give me the product Ids for the user's next order for which I can send out the coupon's to the user_id
 
 ## Question 7
-+ If I am hired as a Machine Learning Engineer, I see myself becoming more adept and experienced with Machine learning algorithms, I see myself in a role where I am learning as well as building new systems and working as a team in the process. I see myself as an asset to the company who helps the company grow in the field on Machine learning.
-+ My Long Term career goals is to work on leading Machine learning techniques and also be in touch with academia which play an important role in this field, this position is suitable for that as this gives me the practical hands on platform to keep learning and apply my knowledge
++ If I am hired as a Machine Learning Engineer, I see myself becoming more adept and experienced with large scale Machine Learning, I see myself in a role where I am learning as well as building new systems and working as a team in the process. I see myself as an asset to the company who helps the company grow in the field of Analytics and data-driven Marketing. I see myself in a position where I can learn and collaborate with passionate data scientists and Machine learning engineers.
++ I see the Job is focused on use of R, Python and Scala, My focus for the next year would be to get better at these languages, my language of preference is python though I would improve of the other languages as per requirement. Besides my current knowledge, I would focus on developing my expertise in NLP and Text mining and learn better data mining procedures using Hadoop and Spark.  
++ My Long Term career goals is to work on leading Machine learning techniques that relate directly to all aspects of Marketing, yield optimization and customer experience, starting from generating data analysis pipelines to acquire new customers and retain existing customers to improving user experience through consistent feedback that is possible through large scale Machine learning. In the long term I am also passionate about using  high-performance computing, distributed systems and applied math These are going to help add to my skill set as I already come from a similar background.
