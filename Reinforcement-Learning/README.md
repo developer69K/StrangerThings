@@ -68,3 +68,4 @@ def q_from_v(env, V, s, gamma=1):
 
 ## Resources
 + Richard Sutton's book : http://www.wildml.com/2016/10/learning-reinforcement-learning/
++ Medium - https://towardsdatascience.com/introduction-to-various-reinforcement-learning-algorithms-i-q-learning-sarsa-dqn-ddpg-72a5e0cb6287

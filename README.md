@@ -14,6 +14,7 @@
 + Latex - https://www.sharelatex.com/learn/Inserting_Images
 + Analytics Vidya: https://www.analyticsvidhya.com/
 + TYRO Labs - https://tryolabs.com/blog/
++ Graphlab - https://turi.com/
 
 # Topics that are important to be clear about
 + tf-idf vectorizer
@@ -68,6 +69,13 @@
 
 ## Project Report
 + https://github.com/udacity/machine-learning/tree/master/projects/capstone
+
+## Hypothesis Testing
++ https://github.com/nirupamaprv/Analyze-AB-test-Results/blob/master/Analyze_ab_test_results_notebook.ipynb
+
+## clustering and Overfitting
++ https://towardsdatascience.com/the-5-clustering-algorithms-data-scientists-need-to-know-a36d136ef68
++ http://statisticsbyjim.com/regression/overfitting-regression-models/
 
 ## DataScience Bowl
 
