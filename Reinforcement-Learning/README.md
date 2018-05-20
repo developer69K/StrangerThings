@@ -66,6 +66,32 @@ def q_from_v(env, V, s, gamma=1):
     return q
 ```
 
+### TD Learning and Q-Learning
++ TD(0)
++ Sarsa-0/Q-learning(0)
++ Sarsamax or Q-learning
++ Expected Sarsamax
+
+### **Max-q Method** [Hierarchical RL with MAX-Q Function -Decomposition] [State abstraction to achieve better Performance] [The Taxi Domain RL Problem]
+
++ Reference: https://arxiv.org/pdf/cs/9905014.pdf
++ Max-q method , provides a Hierarchical decomposition of the given RL problem into sub-problems
+  - Given value Function into a number of sub-value functions
++ Three ways to break the Target MDP into hierarchy of Sub-problems
+  - One approach is to define each subtask as a fixed policy that is provided to the programmer **[ The “option” method of Sutton,Precup, and Singh (1998) takes this approach]**
+  - Define each subtask in terms of a non-deterministic Finite state controller **[ Hierarchy of Abstract Machines (HAM) method of Parr and Russell (1998)]**
+    + This allows the programmer to provide a "Partial Policy" that constrains the set of the permitted actions at each point, but does not specify any complete policy
+  - Define each subtask in terms of termination predicate and a local reward function.  Final reward  
++ Problems with this Hierarchical Approach (3rd approach)
+  - The termination predicate method suffers from an additional source of sub optimality. The learning algorithm described in this paper converges to a form of local optimality that we call
+***recursive optimality***
++ We will see that the MAXQ method creates many opportunities to exploit state abstraction, and that these abstractions can have a huge impact in accelerating learning
++ The successful use of state abstraction requires that subtasks be defined in terms of termination predicates rather than using the option or partial policy methods
++ In this paper, The MAXQ-Q, does a fully online-learning of hierarchical value function, we show that the algorithm converges to a recursively optimal policy and is faster
+
 ## Resources
 + Richard Sutton's book : http://www.wildml.com/2016/10/learning-reinforcement-learning/
 + Medium - https://towardsdatascience.com/introduction-to-various-reinforcement-learning-algorithms-i-q-learning-sarsa-dqn-ddpg-72a5e0cb6287
++ TD learning simulation - http://kldavenport.com/suttons-temporal-difference-learning/
++ Deep RL Learning - https://mpatacchiola.github.io/ | https://github.com/mpatacchiola/dissecting-reinforcement-learning
++ RL problem - http://www-anw.cs.umass.edu/~barto/courses/cs687/
